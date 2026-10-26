@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F4A45">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="말씀의 등불">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>말씀의 등불</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
+/* Layout: one calm reading column; the KJV text is set like a printed page, Korean guidance around it */
+:root{
+  --bg:#F2F4F2; --surface:#FFFFFF; --ink:#1C2826; --muted:#5D6A67; --line:#D9DFDC;
+  --accent:#7A5A0C; --accent-soft:#F3E9CF; --deep:#1F4A45; --deep-soft:#E2ECEA; --warn:#9A2F25; --warn-soft:#F7E3DF;
+  --f-display:"Gowun Batang","Nanum Myeongjo",Georgia,serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-kjv:"EB Garamond","Iowan Old Style",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#19211F; --ink:#E6EAE7; --muted:#9AA7A3; --line:#2C3835;
+  --accent:#E2B957; --accent-soft:#2E2715; --deep:#8CC7BD; --deep-soft:#1C2E2B; --warn:#F09A8E; --warn-soft:#3A1F1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#19211F; --ink:#E6EAE7; --muted:#9AA7A3; --line:#2C3835;
+  --accent:#E2B957; --accent-soft:#2E2715; --deep:#8CC7BD; --deep-soft:#1C2E2B; --warn:#F09A8E; --warn-soft:#3A1F1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header{padding-top:36px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{flex:none}
+h1{font-family:var(--f-display);font-weight:700;font-size:2rem;margin:0;letter-spacing:-.01em}
+.tagline{font-family:var(--f-kjv);font-style:italic;color:var(--muted);margin:0;font-size:1.05rem}
+h2{font-family:var(--f-display);font-size:1.3rem;margin:0;text-wrap:balance;word-break:keep-all}
+h3{font-family:var(--f-display);font-size:1.08rem;margin:0}
+.label{font-size:.75rem;letter-spacing:.08em;color:var(--muted);font-weight:500}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;font:inherit;font-weight:500;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.panel{display:flex;flex-direction:column;gap:22px}
+textarea,input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:100%}
+textarea{min-height:130px;resize:vertical;line-height:1.6}
+textarea:focus,input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ask{display:flex;flex-direction:column;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:11px 20px;cursor:pointer;border:1px solid var(--deep);background:var(--deep);color:var(--bg)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ghost{background:transparent;color:var(--deep)}
+.hint{font-size:.85rem;color:var(--muted)}
+.verse{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.verse .ref{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.verse .ref b{font-family:var(--f-display);color:var(--accent);font-size:1rem}
+.verse .ref span{font-family:var(--f-kjv);color:var(--muted);font-size:.95rem}
+.kjv{font-family:var(--f-kjv);font-size:1.22rem;line-height:1.55;margin:0}
+.kjv sup{font-family:var(--f-body);font-size:.62rem;color:var(--muted);margin-right:3px;font-variant-numeric:tabular-nums}
+.meaning{margin:0;color:var(--ink)}
+.why{margin:0;color:var(--muted);font-size:.93rem}
+.vactions{display:flex;gap:14px}
+.link{background:none;border:0;padding:0;font:inherit;font-size:.85rem;color:var(--deep);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.result{display:flex;flex-direction:column;gap:18px}
+.reflect{font-family:var(--f-display);font-size:1.15rem;line-height:1.7;margin:0}
+.guide{background:var(--deep-soft);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.guide p{margin:0}
+.guide ol{margin:0;padding-left:1.3em}
+.prayer{border-left:3px solid var(--accent);padding:4px 0 4px 16px;font-family:var(--f-display);margin:0;white-space:pre-line}
+.safety{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn);border-radius:12px;padding:14px 18px}
+.safety b{color:var(--warn)}
+.status{color:var(--muted);font-size:.95rem;display:flex;gap:10px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:glow 1.4s ease-in-out infinite}
+@keyframes glow{50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.dot{animation:none}}
+.daily{display:flex;flex-direction:column;gap:10px}
+.reader-controls{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.chapter{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+.chapter p{font-family:var(--f-kjv);font-size:1.15rem;line-height:1.6;margin:0 0 6px}
+.chapter p.hl{background:var(--accent-soft);border-radius:4px}
+.chapter-nav{display:flex;justify-content:space-between}
+.hits{display:flex;flex-direction:column;gap:2px}
+.hit{background:none;border:0;border-bottom:1px solid var(--line);text-align:left;padding:10px 2px;font:inherit;color:var(--ink);cursor:pointer}
+.hit:hover{background:var(--surface)}
+.hit .r{font-size:.82rem;color:var(--accent);font-weight:500;display:block}
+.hit .t{font-family:var(--f-kjv);font-size:1.05rem}
+mark{background:var(--accent-soft);color:inherit;padding:0 1px}
+.empty{color:var(--muted);text-align:center;padding:24px 0}
+footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:480px){h1{font-size:1.6rem}.kjv{font-size:1.12rem}.reader-controls{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M6 22c0-3 4-4 11-4s11 1 11 4-5 4-11 4-11-1-11-4z" fill="var(--accent)" opacity=".85"/><path d="M27 21c3-1 4-3 3-5" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M17 6c3 3 4 6 2 9-1 1-3 1-4 0-2-3-1-6 2-9z" fill="var(--accent)"/></svg>
+      <h1>말씀의 등불</h1>
+    </div>
+    <p class="tagline">“Thy word is a lamp unto my feet, and a light unto my path.” — Psalms 119:105</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-ask" aria-selected="true" data-view="ask">마음 나누기</button>
+    <button role="tab" id="tab-read" aria-selected="false" data-view="read">성경 읽기·검색</button>
+    <button role="tab" id="tab-saved" aria-selected="false" data-view="saved">간직한 말씀</button>
+  </nav>
+
+  <section class="panel" id="view-ask">
+    <div class="ask">
+      <label for="situation"><h2>오늘 어떤 일이 있었나요? 지금 마음은 어떤가요?</h2></label>
+      <textarea id="situation" placeholder="예: 회사에서 실수를 해서 상사에게 크게 혼났어요. 내가 너무 부족한 사람 같고, 내일 출근하는 게 두려워요."></textarea>
+      <div class="label">마음을 고르면 함께 담아 보냅니다</div>
+      <div class="chips" id="chips"></div>
+      <div class="row">
+        <button class="btn" id="go">하나님의 말씀 구하기</button>
+        <button class="btn ghost" id="stop" hidden>멈추기</button>
+        <span class="hint" id="modeHint"></span>
+      </div>
+      <div class="hint" id="aiLink" hidden>Claude와 함께 더 깊이 묻고 싶다면 <a href="https://claude.ai/artifact/FESqiPKL4F6TmAmTJ6xm59" target="_blank" rel="noopener" style="color:var(--deep)">claude.ai에서 열기</a>
+      </div>
+    </div>
+    <div id="out"></div>
+    <div class="daily" id="daily"></div>
+  </section>
+
+  <section class="panel" id="view-read" hidden>
+    <div class="reader-controls">
+      <select id="book" aria-label="책"></select>
+      <select id="chap" aria-label="장"></select>
+    </div>
+    <div class="chapter-nav"><button class="link" id="prev">← 이전 장</button><button class="link" id="next">다음 장 →</button></div>
+    <div class="chapter" id="chapter"><p class="empty">성경 본문을 불러오는 중입니다…</p></div>
+    <div class="ask">
+      <label for="q"><h3>킹제임스 성경 전체에서 찾기</h3></label>
+      <input id="q" placeholder="영어 단어로 검색 (예: peace, fear not, comfort)">
+      <div class="hint" id="qhint">31,102절 전체를 검색합니다. 최대 100개까지 보여줍니다.</div>
+      <div class="hits" id="hits"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="view-saved" hidden>
+    <h2>간직한 말씀</h2>
+    <div id="savedList" class="result"></div>
+  </section>
+
+  <footer>본문: King James Version (1611/1769, 퍼블릭 도메인) 전체 66권 31,102절. 한국어 풀이와 조언은 참고용이며, 목회자·전문 상담을 대신하지 않습니다. 마음이 많이 힘들다면 자살예방상담전화 <b>109</b> (24시간)로 연락하세요.</footer>
+</div>
+
+<script>
+const TOPICS=[
+ {id:"anx",label:"불안·걱정",kw:["불안","걱정","초조","염려","긴장","잠이 안","신경 쓰"],msg:"하나님은 염려를 혼자 짊어지지 말고 기도로 맡기라고 하십니다. 내일 일은 내일 걱정하고, 오늘 할 수 있는 한 걸음에 마음을 모아 보세요.",v:[["Philippians 4:6-7","아무것도 염려하지 말고 감사함으로 기도하면, 이해를 넘어서는 하나님의 평강이 마음을 지켜 주십니다."],["Matthew 6:34","내일 일은 내일이 걱정할 것이니, 오늘의 짐만 지면 됩니다."],["1 Peter 5:7","모든 염려를 주께 맡기세요. 그분이 당신을 돌보십니다."],["Isaiah 41:10","두려워하지 말라, 내가 너와 함께하며 붙들어 주겠다는 약속입니다."]]},
+ {id:"fear",label:"두려움",kw:["두려","무서","겁","떨려","공포"],msg:"두려움 앞에서 하나님은 ‘내가 너와 함께한다’고 거듭 말씀하십니다. 두려움이 사라지길 기다리기보다, 함께하시는 분을 의지하며 한 걸음 내딛어 보세요.",v:[["Joshua 1:9","강하고 담대하라. 어디로 가든 하나님이 함께하신다."],["Psalms 27:1","주님이 나의 빛과 구원이시니 내가 누구를 두려워하랴."],["2 Timothy 1:7","하나님은 두려워하는 마음이 아니라 능력과 사랑과 절제의 마음을 주셨습니다."],["Psalms 56:3","두려울 때마다 나는 주님을 신뢰하겠습니다."]]},
+ {id:"lonely",label:"외로움",kw:["외로","혼자","고독","아무도","소외","쓸쓸"],msg:"사람들이 곁에 없다고 느껴질 때에도 하나님은 결코 떠나지 않으십니다. 오늘 한 사람에게 먼저 안부를 건네 보는 것도 그분이 열어 주시는 길일 수 있습니다.",v:[["Hebrews 13:5","내가 결코 너를 떠나지 않고 버리지 않겠다."],["Matthew 28:20","세상 끝날까지 항상 너희와 함께 있겠다는 예수님의 약속입니다."],["Psalms 27:10","부모가 나를 버려도 주님은 나를 받아 주십니다."],["Deuteronomy 31:6","강하고 담대하라. 그분이 너와 함께 가시며 버리지 않으신다."]]},
+ {id:"grief",label:"슬픔·상실",kw:["슬프","슬픔","눈물","잃","떠나보","돌아가셨","이별","상실","우울"],msg:"슬픔은 믿음이 약해서가 아닙니다. 예수님도 우셨습니다. 하나님은 상한 마음 가까이에 계시니, 억지로 괜찮은 척하지 말고 그분 앞에 마음을 쏟아 놓으세요.",v:[["Psalms 34:18","주님은 마음이 상한 자에게 가까이 계시고 낙심한 영혼을 구원하십니다."],["Matthew 5:4","애통하는 자는 복이 있나니 위로를 받을 것이다."],["Psalms 147:3","상한 마음을 고치시고 상처를 싸매 주십니다."],["Revelation 21:4","하나님께서 모든 눈물을 닦아 주시고 다시는 사망과 슬픔이 없게 하십니다."]]},
+ {id:"anger",label:"분노",kw:["화가","화나","분노","짜증","열받","억울","미워"],msg:"화가 나는 감정 자체는 죄가 아니지만, 그 감정에 끌려 말하고 행동하지 않도록 하라고 하십니다. 바로 반응하기 전에 한 번 멈추고, 듣기를 먼저 해 보세요.",v:[["Ephesians 4:26-27","분을 내어도 죄를 짓지 말고, 해가 지도록 분을 품지 말라."],["James 1:19-20","듣기는 빨리, 말하기는 더디, 성내기도 더디 하라."],["Proverbs 15:1","부드러운 대답은 분노를 가라앉힌다."],["Proverbs 16:32","노하기를 더디 하는 사람이 용사보다 낫다."]]},
+ {id:"forgive",label:"상처·용서",kw:["상처","배신","용서","서운","무시당","모욕","괴롭"],msg:"용서는 상대의 잘못을 없던 일로 하는 것이 아니라, 판단과 갚음을 하나님께 맡기고 내 마음을 묶은 줄을 푸는 일입니다. 오늘 당장 되지 않아도 괜찮습니다. 용서하고 싶은 마음을 구하는 기도부터 시작해 보세요.",v:[["Colossians 3:13","주께서 너희를 용서하신 것처럼 너희도 서로 용서하라."],["Ephesians 4:32","서로 친절하고 불쌍히 여기며 용서하라."],["Romans 12:19","원수 갚는 것은 하나님께 맡기라."],["Matthew 6:14-15","남의 잘못을 용서하면 하늘 아버지도 너희를 용서하신다."]]},
+ {id:"guilt",label:"죄책감·후회",kw:["죄책","후회","잘못했","실수","부끄","자책","죄"],msg:"하나님은 정직하게 고백하는 사람을 정죄하지 않고 깨끗하게 하십니다. 잘못은 인정하고, 바로잡을 수 있는 것은 바로잡되, 이미 용서받은 일로 자신을 계속 벌하지는 마세요.",v:[["1 John 1:9","우리가 죄를 자백하면 그분은 신실하셔서 용서하고 깨끗하게 하십니다."],["Psalms 103:12","동이 서에서 먼 것처럼 우리의 죄를 멀리 옮기셨습니다."],["Romans 8:1","그리스도 예수 안에 있는 사람에게는 결코 정죄함이 없습니다."],["Isaiah 1:18","너희 죄가 주홍 같을지라도 눈처럼 희게 되리라."]]},
+ {id:"tired",label:"지침·번아웃",kw:["지쳐","지침","피곤","힘들","번아웃","버겁","무기력","쉬고"],msg:"예수님은 지친 사람에게 더 노력하라고 하지 않으시고 ‘내게로 와서 쉬라’고 하십니다. 쉼도 순종입니다. 오늘은 해야 할 일 하나를 내려놓고 쉬는 시간을 정해 보세요.",v:[["Matthew 11:28-30","수고하고 무거운 짐 진 자들아 내게로 오라, 내가 너희를 쉬게 하리라."],["Isaiah 40:31","주를 앙망하는 자는 새 힘을 얻어 독수리처럼 날아오른다."],["Psalms 23:1-3","주님은 나를 푸른 풀밭과 쉴 만한 물가로 인도하시고 영혼을 소생시키십니다."],["Galatians 6:9","선을 행하다 낙심하지 말라. 때가 되면 거두게 된다."]]},
+ {id:"decide",label:"결정·진로",kw:["결정","선택","진로","고민","이직","방향","어떻게 해야","갈림길"],msg:"하나님은 지혜를 구하는 사람에게 꾸짖지 않고 넉넉히 주신다고 하십니다. 내 명철만 의지하지 말고 기도하며, 말씀과 믿음의 사람들의 조언, 그리고 마음의 평안을 함께 살펴보세요.",v:[["Proverbs 3:5-6","네 명철을 의지하지 말고 범사에 주를 인정하라. 그가 길을 지도하시리라."],["James 1:5","지혜가 부족하면 하나님께 구하라. 후히 주신다."],["Psalms 32:8","내가 네 갈 길을 가르쳐 보이고 너를 주목하여 훈계하리라."],["Psalms 119:105","주의 말씀은 내 발의 등이요 내 길의 빛입니다."]]},
+ {id:"fail",label:"낙심·실패",kw:["실패","낙심","좌절","떨어졌","망했","포기","절망","희망이 없"],msg:"실패가 당신의 끝이 아닙니다. 하나님은 모든 것을 합력하여 선을 이루시는 분입니다. 지금은 이해되지 않아도, 그분이 당신을 위해 품고 계신 계획은 평안과 소망입니다.",v:[["Romans 8:28","하나님을 사랑하는 자에게는 모든 것이 합력하여 선을 이룹니다."],["Jeremiah 29:11","너희를 향한 나의 생각은 재앙이 아니라 평안이요 소망을 주려는 것이다."],["2 Corinthians 4:8-9","사방으로 우겨쌈을 당해도 싸이지 않고, 넘어져도 망하지 않는다."],["Psalms 42:11","내 영혼아 왜 낙심하느냐, 하나님을 바라라."]]},
+ {id:"relate",label:"관계·갈등",kw:["가족","부모","남편","아내","친구","동료","상사","직장","싸웠","갈등","자녀","아이"],msg:"할 수 있는 한 모든 사람과 화목하라고 하십니다. 상대를 바꾸려 하기보다, 내가 대접받고 싶은 대로 먼저 대하는 작은 행동 하나를 정해 보세요.",v:[["Romans 12:18","할 수 있거든 너희로서는 모든 사람과 더불어 화목하라."],["Matthew 7:12","남에게 대접받고자 하는 대로 너희도 남을 대접하라."],["1 Corinthians 13:4-5","사랑은 오래 참고 온유하며, 성내지 않고 악한 것을 생각하지 않습니다."],["Proverbs 17:17","친구는 사랑이 끊이지 않고, 형제는 위급할 때를 위해 났다."]]},
+ {id:"money",label:"돈·생계",kw:["돈","빚","생활비","월급","경제","가난","실직","취업","대출"],msg:"하나님은 공중의 새도 먹이시는 분입니다. 먼저 그의 나라와 의를 구하면 필요한 것을 채우신다고 약속하셨습니다. 걱정과 함께, 오늘 할 수 있는 성실한 한 가지를 정해 보세요.",v:[["Matthew 6:31-33","무엇을 먹을까 걱정하지 말고 먼저 그의 나라와 의를 구하라."],["Philippians 4:19","하나님이 너희 모든 쓸 것을 채우시리라."],["Psalms 37:25","의인이 버림받거나 그 자손이 걸식함을 보지 못하였다."],["Proverbs 16:3","네 행사를 여호와께 맡기라. 그러면 경영하는 것이 이루어진다."]]},
+ {id:"sick",label:"질병·아픔",kw:["아파","아픔","병","수술","진단","통증","건강","치료"],msg:"몸이 아플 때 하나님은 고치시는 분이며, 약할 때 그분의 능력이 온전해진다고 하십니다. 치료를 성실히 받으며, 두려움과 아픔을 솔직하게 기도로 올려 드리세요.",v:[["Jeremiah 17:14","주여, 나를 고치소서. 그리하면 내가 낫겠나이다."],["2 Corinthians 12:9","내 은혜가 네게 족하다. 내 능력은 약한 데서 온전해진다."],["Psalms 41:3","주께서 병상에서 그를 붙드시리라."],["Isaiah 53:5","그가 채찍에 맞음으로 우리가 나음을 입었도다."]]},
+ {id:"thank",label:"감사·기쁨",kw:["감사","기쁘","기뻐","행복","좋은 일","축하","합격"],msg:"좋은 일 앞에서 감사를 표현하는 것은 그 기쁨을 하나님과 나누는 일입니다. 받은 은혜를 잊지 않도록 기록해 두고, 그 기쁨을 다른 사람과도 나눠 보세요.",v:[["1 Thessalonians 5:16-18","항상 기뻐하라, 쉬지 말고 기도하라, 범사에 감사하라."],["Psalms 118:24","이 날은 주께서 정하신 것이니 기뻐하고 즐거워하자."],["Psalms 100:4","감사함으로 그의 문에 들어가며 찬송함으로 그 궁정에 들어가라."],["James 1:17","모든 좋은 은사는 위로부터, 빛들의 아버지께로부터 내려옵니다."]]},
+ {id:"envy",label:"비교·질투",kw:["비교","질투","부러","시기","열등감","나만"],msg:"하나님은 각 사람에게 다른 길과 은사를 주셨습니다. 남의 길과 비교하기보다 내 몫에 감사하고, 오늘 내가 할 일을 충실히 하는 데서 자족을 배워 보세요.",v:[["Galatians 6:4","각자 자기 일을 살피라. 그러면 자랑할 것이 자기에게 있다."],["Proverbs 14:30","평온한 마음은 육신의 생명이나 시기는 뼈를 썩게 한다."],["Philippians 4:11-12","나는 어떤 형편에서든지 자족하기를 배웠다."],["Psalms 37:1-2","악을 행하는 자를 부러워하지 말라. 풀같이 쇠잔할 것이다."]]},
+ {id:"tempt",label:"유혹",kw:["유혹","중독","끊고","참기","게임","술","음란"],msg:"하나님은 감당할 수 없는 시험은 허락하지 않으시고 피할 길을 주십니다. 유혹이 오는 상황을 미리 피하고, 믿을 만한 사람에게 도움을 청하는 것도 그 피할 길입니다.",v:[["1 Corinthians 10:13","감당할 시험만 허락하시고 피할 길을 내신다."],["James 4:7","하나님께 순복하고 마귀를 대적하라. 그러면 피하리라."],["Matthew 26:41","시험에 들지 않게 깨어 기도하라."],["Psalms 119:11","주께 범죄하지 않으려고 주의 말씀을 마음에 두었습니다."]]}
+];
+const DANGER=["죽고 싶","죽고싶","자살","사라지고 싶","살기 싫","끝내고 싶","자해"];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let BIBLE=null, byName={};
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+
+/* ---------- Bible data ---------- */
+const bibleReady=fetch("kjv.json").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+  BIBLE=d; d.forEach((b,i)=>{byName[b.n.toLowerCase()]=i;byName[b.k]=i;});
+  Object.assign(byName,{"psalm":18,"song of songs":21,"revelations":65});
+  initReader(); renderDaily(); renderSaved(); return d;
+}).catch(()=>{ $("chapter").innerHTML='<p class="empty">성경 본문을 불러오지 못했습니다. 페이지를 새로고침해 주세요.</p>'; });
+
+function findBook(name){ if(name==null)return -1; const k=String(name).trim().toLowerCase(); return byName[k]??byName[String(name).trim()]??-1; }
+function parseRef(s){ const m=s.match(/^(.+?)\s+(\d+):(\d+)(?:-(\d+))?$/); if(!m)return null; return {b:findBook(m[1]),c:+m[2],s:+m[3],e:+(m[4]||m[3])}; }
+function passage(p){ // returns validated passage or null
+  if(!BIBLE||p.b<0)return null; const ch=BIBLE[p.b].c[p.c-1]; if(!ch)return null;
+  const s=Math.max(1,p.s|0), e=Math.min(ch.length,Math.max(s,p.e|0||s), s+7); if(s>ch.length)return null;
+  return {b:p.b,c:p.c,s,e,verses:ch.slice(s-1,e)};
+}
+const refKo=p=>`${BIBLE[p.b].k} ${p.c}:${p.s}${p.e>p.s?"–"+p.e:""}`;
+const refEn=p=>`${BIBLE[p.b].n} ${p.c}:${p.s}${p.e>p.s?"-"+p.e:""}`;
+
+function verseCard(p,meaning,why){
+  const el=document.createElement("article"); el.className="verse";
+  const key=refEn(p);
+  el.innerHTML=`<div class="ref"><b>${esc(refKo(p))}</b><span>${esc(key)} · KJV</span></div>
+   <p class="kjv">${p.verses.map((t,i)=>`<sup>${p.s+i}</sup>${esc(t)}`).join(" ")}</p>
+   ${meaning?`<p class="meaning">${esc(meaning)}</p>`:""}${why?`<p class="why">${esc(why)}</p>`:""}
+   <div class="vactions"><button class="link" data-a="ctx">앞뒤 문맥 읽기</button><button class="link" data-a="save">${isSaved(key)?"간직함 ✓":"말씀 간직하기"}</button></div>`;
+  el.querySelector('[data-a="ctx"]').onclick=()=>openReader(p.b,p.c,p.s,p.e);
+  el.querySelector('[data-a="save"]').onclick=e=>{toggleSave(key,meaning);e.target.textContent=isSaved(key)?"간직함 ✓":"말씀 간직하기";};
+  return el;
+}
+
+/* ---------- Saved ---------- */
+const isSaved=k=>store.get("saved",[]).some(x=>x.ref===k);
+function toggleSave(ref,meaning){ let s=store.get("saved",[]); s=isSaved(ref)?s.filter(x=>x.ref!==ref):[{ref,meaning:meaning||"",at:Date.now()},...s]; store.set("saved",s); renderSaved(); }
+function renderSaved(){
+  const box=$("savedList"); box.innerHTML=""; const s=store.get("saved",[]);
+  if(!s.length){box.innerHTML='<p class="empty">마음에 닿은 말씀에서 ‘말씀 간직하기’를 누르면 여기에 모입니다. 이 기기에만 저장됩니다.</p>';return;}
+  if(!BIBLE)return; s.forEach(x=>{const p=passage(parseRef(x.ref)||{b:-1}); if(p)box.append(verseCard(p,x.meaning));});
+}
+
+/* ---------- Daily verse ---------- */
+function renderDaily(){
+  const all=TOPICS.flatMap(t=>t.v); const day=Math.floor(Date.now()/864e5); const [r,m]=all[day%all.length];
+  const p=passage(parseRef(r)); if(!p)return;
+  $("daily").innerHTML='<div class="label">오늘의 말씀</div>'; $("daily").append(verseCard(p,m));
+}
+
+/* ---------- Chips ---------- */
+const picked=new Set();
+TOPICS.forEach(t=>{const b=document.createElement("button");b.className="chip";b.textContent=t.label;b.setAttribute("aria-pressed","false");
+  b.onclick=()=>{picked.has(t.id)?picked.delete(t.id):picked.add(t.id);b.setAttribute("aria-pressed",picked.has(t.id));};$("chips").append(b);});
+
+/* ---------- Asking ---------- */
+let sample=null, ctl=null;
+(async()=>{ try{ sample=await window.claude?.use?.("sample"); }catch{ sample=null; }
+  $("modeHint").textContent=sample?"Claude가 상황에 맞는 KJV 말씀을 찾아 한국어로 풀어 드립니다.":"주제별로 엄선한 말씀을 보여 드립니다."; $("aiLink").hidden=!!sample; })();
+$("modeHint").textContent="";
+
+function matchTopics(text){
+  const ids=new Set(picked);
+  TOPICS.forEach(t=>{ if(t.kw.some(k=>text.includes(k))) ids.add(t.id); });
+  return TOPICS.filter(t=>ids.has(t.id));
+}
+function safetyBox(extra){ const d=document.createElement("div"); d.className="safety";
+  d.innerHTML=`<b>지금 많이 힘드시군요.</b> 혼자 견디지 않아도 됩니다. 자살예방상담전화 <b>109</b>(24시간), 긴급한 위험이 있으면 <b>112 / 119</b>에 연락하세요. 믿을 수 있는 사람이나 목회자에게도 지금 마음을 말해 주세요.${extra?"<br>"+esc(extra):""}`; return d; }
+
+function renderCurated(text,out){
+  let ts=matchTopics(text); const fallback=!ts.length; if(fallback) ts=[TOPICS[0],TOPICS[7]];
+  const wrap=document.createElement("div"); wrap.className="result";
+  if(fallback) wrap.insertAdjacentHTML("beforeend",`<p class="hint">특정 주제를 찾지 못해 많은 분들이 찾는 말씀을 먼저 보여 드려요. 위에서 마음을 골라 보시면 더 잘 맞는 말씀을 드릴 수 있어요.</p>`);
+  ts.slice(0,3).forEach(t=>{
+    wrap.insertAdjacentHTML("beforeend",`<h2>${esc(t.label)}</h2><div class="guide"><p>${esc(t.msg)}</p></div>`);
+    t.v.forEach(([r,m])=>{const p=passage(parseRef(r)); if(p)wrap.append(verseCard(p,m));});
+  });
+  out.append(wrap);
+}
+
+function bookList(){ return BIBLE.map(b=>b.n).join(", "); }
+function buildPrompt(text,tags){
+  return `당신은 성경(King James Version)에 깊이 정통한, 따뜻하고 지혜로운 신앙의 동반자입니다. 한 사람이 일상의 상황과 마음을 털어놓았습니다. 하나님께서 성경을 통해 이 사람에게 주시는 인도와 위로, 권면을 전해 주세요.
+
+원칙:
+- 오직 KJV 성경 본문에 근거하세요. 3~5개의 본문을 고르고, 각 본문은 1~5절 이내로 정확한 장절을 지정하세요. 실제로 존재하는 장절만 쓰세요.
+- 위로만 하지 말고, 필요하면 성경이 말하는 부드러운 권면(회개, 용서, 인내, 지혜로운 행동)도 함께 전하세요. 정죄하거나 단정하지 마세요.
+- 하나님의 말씀을 직접 대언하는 척하지 말고 "성경은 ~라고 말씀합니다"처럼 말씀에 근거해 전하세요.
+- 모든 설명은 한국어로, 따뜻한 존댓말로 쓰세요.
+- 자해·자살·학대·위급한 위험의 신호가 있으면 "safety" 필드에 109(자살예방상담전화)나 112/119 등 도움을 구하도록 부드럽게 권하는 문장을 넣으세요. 없으면 빈 문자열.
+
+책 이름(book)은 반드시 다음 목록의 영어 이름 그대로 쓰세요: ${bookList()}
+
+다음 JSON 객체 하나로만 답하세요:
+{"reflection":"상황과 마음을 공감하며 비추는 1~2문장","passages":[{"book":"Psalms","chapter":34,"start":18,"end":18,"meaning":"이 본문의 뜻을 쉬운 한국어로 1~2문장","why":"이 사람의 상황에 왜 이 말씀인지 1문장"}],"guidance":"말씀에 근거한 인도와 조언 2~3문단(문단은 \\n\\n로 구분)","steps":["오늘 실천할 수 있는 작은 한 걸음", "..."],"prayer":"이 사람이 드릴 수 있는 짧은 기도문(3~5문장)","safety":""}
+
+선택한 마음: ${tags||"(없음)"}
+털어놓은 이야기:
+"""${text.slice(0,4000)}"""`;
+}
+
+function renderAI(r,out){
+  const wrap=document.createElement("div"); wrap.className="result";
+  if(r.safety&&String(r.safety).trim()) wrap.append(safetyBox(String(r.safety)));
+  if(r.reflection) wrap.insertAdjacentHTML("beforeend",`<p class="reflect">${esc(r.reflection)}</p>`);
+  let n=0;
+  (Array.isArray(r.passages)?r.passages:[]).forEach(x=>{
+    const p=passage({b:findBook(x.book),c:+x.chapter,s:+x.start,e:+(x.end||x.start)});
+    if(p){wrap.append(verseCard(p,x.meaning,x.why));n++;}
+  });
+  if(!n){ out.innerHTML=""; renderCurated($("situation").value,out); return; }
+  const g=document.createElement("div"); g.className="guide";
+  g.innerHTML=`<h3>말씀이 주는 인도</h3>${String(r.guidance||"").split(/\n\s*\n/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join("")}`+
+    (Array.isArray(r.steps)&&r.steps.length?`<div class="label">오늘의 작은 걸음</div><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:"");
+  wrap.append(g);
+  if(r.prayer) wrap.insertAdjacentHTML("beforeend",`<div class="label">함께 드리는 기도</div><p class="prayer">${esc(r.prayer)}</p>`);
+  out.append(wrap);
+}
+
+$("go").onclick=async()=>{
+  const text=$("situation").value.trim(); const out=$("out");
+  if(!text&&!picked.size){ out.innerHTML='<p class="hint">어떤 일이 있었는지 적거나, 지금 마음을 하나 이상 골라 주세요.</p>'; $("situation").focus(); return; }
+  await bibleReady; if(!BIBLE)return;
+  out.innerHTML=""; $("daily").hidden=true;
+  if(DANGER.some(k=>text.includes(k))) out.append(safetyBox());
+  const tags=TOPICS.filter(t=>picked.has(t.id)).map(t=>t.label).join(", ");
+  if(!sample){ renderCurated(text,out); return; }
+  const st=document.createElement("div"); st.className="status"; st.innerHTML='<span class="dot"></span>말씀을 묵상하며 찾고 있습니다… (보통 20~40초)'; out.append(st);
+  $("go").disabled=true; $("stop").hidden=false; ctl=new AbortController();
+  try{
+    const r=await sample.json(buildPrompt(text||"(마음만 선택함)",tags),{signal:ctl.signal,cache:false});
+    st.remove(); renderAI(r||{},out);
+  }catch(e){
+    st.remove();
+    if(e?.code!=="cancelled"){
+      const msg={not_granted:"Claude 사용을 허락하지 않아 엄선한 말씀으로 보여 드려요.",rate_limited:"요청이 많아 잠시 후 다시 시도해 주세요. 우선 엄선한 말씀을 보여 드려요.",session_expired:"다시 로그인이 필요합니다. 우선 엄선한 말씀을 보여 드려요."}[e?.code]||"답을 받지 못해 엄선한 말씀으로 보여 드려요. 다시 시도할 수 있습니다.";
+      out.insertAdjacentHTML("beforeend",`<p class="hint">${esc(msg)}</p>`);
+      if(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e?.code)){ sample=null; $("modeHint").textContent="주제별로 엄선한 말씀을 보여 드립니다."; }
+    }
+    renderCurated(text,out);
+  }finally{ $("go").disabled=false; $("stop").hidden=true; }
+};
+$("stop").onclick=()=>ctl?.abort();
+
+/* ---------- Reader ---------- */
+let cur={b:18,c:23};
+function initReader(){
+  $("book").innerHTML=BIBLE.map((b,i)=>`<option value="${i}">${esc(b.k)} · ${esc(b.n)}</option>`).join("");
+  $("book").onchange=()=>{cur={b:+$("book").value,c:1};showChapter();};
+  $("chap").onchange=()=>{cur.c=+$("chap").value;showChapter();};
+  $("prev").onclick=()=>step(-1); $("next").onclick=()=>step(1);
+  showChapter();
+}
+function step(d){ let {b,c}=cur; c+=d; if(c<1){ if(b===0)return; b--; c=BIBLE[b].c.length; } else if(c>BIBLE[b].c.length){ if(b===65)return; b++; c=1; } cur={b,c}; showChapter(); }
+function showChapter(hs,he){
+  const B=BIBLE[cur.b]; $("book").value=cur.b;
+  $("chap").innerHTML=B.c.map((_,i)=>`<option value="${i+1}">${i+1}장</option>`).join(""); $("chap").value=cur.c;
+  $("chapter").innerHTML=`<h3 style="margin-bottom:12px">${esc(B.k)} ${cur.c}장 <span class="hint">${esc(B.n)} ${cur.c}</span></h3>`+
+    B.c[cur.c-1].map((t,i)=>`<p id="v${i+1}" class="${hs&&i+1>=hs&&i+1<=he?"hl":""}"><sup style="font-family:var(--f-body);font-size:.62rem;color:var(--muted);margin-right:4px">${i+1}</sup>${esc(t)}</p>`).join("");
+}
+function openReader(b,c,s,e){ cur={b,c}; setView("read"); showChapter(s,e); document.getElementById("v"+s)?.scrollIntoView({block:"center"}); }
+
+let qt; $("q").oninput=()=>{clearTimeout(qt);qt=setTimeout(search,250);};
+function search(){
+  const q=$("q").value.trim(); const box=$("hits"); box.innerHTML=""; if(!BIBLE||q.length<2){$("qhint").textContent="31,102절 전체를 검색합니다. 최대 100개까지 보여줍니다.";return;}
+  const ql=q.toLowerCase(); const hits=[]; let total=0;
+  BIBLE.forEach((B,bi)=>B.c.forEach((ch,ci)=>ch.forEach((t,vi)=>{ if(t.toLowerCase().includes(ql)){ total++; if(hits.length<100)hits.push([bi,ci+1,vi+1,t]); } })));
+  $("qhint").textContent=total?`‘${q}’ ${total.toLocaleString()}절에서 찾았습니다${total>100?" (처음 100절 표시)":""}.`:`‘${q}’를 찾지 못했습니다. KJV는 영어 본문이라 영어 단어로 검색해 주세요.`;
+  const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");
+  hits.forEach(([b,c,v,t])=>{ const h=document.createElement("button"); h.className="hit";
+    h.innerHTML=`<span class="r">${esc(BIBLE[b].k)} ${c}:${v} · ${esc(BIBLE[b].n)}</span><span class="t">${esc(t).replace(re,m=>`<mark>${m}</mark>`)}</span>`;
+    h.onclick=()=>openReader(b,c,v,v); box.append(h); });
+}
+
+/* ---------- Tabs ---------- */
+function setView(v){ document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
+  ["ask","read","saved"].forEach(x=>$("view-"+x).hidden=x!==v); store.set("view",v); }
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+</script>
+</body>
+</html>
