@@ -65,6 +65,11 @@ textarea:focus,input:focus,select:focus,button:focus-visible{outline:2px solid v
 .verse .ref b{font-family:var(--f-display);color:var(--accent);font-size:1rem}
 .verse .ref span{font-family:var(--f-kjv);color:var(--muted);font-size:.95rem}
 .kjv{font-family:var(--f-kjv);font-size:1.22rem;line-height:1.55;margin:0}
+.kor{font-family:var(--f-display);font-size:1.02rem;line-height:1.75;margin:0;padding-top:10px;border-top:1px dashed var(--line);word-break:keep-all}
+.kor:empty{display:none}
+.kor sup{font-family:var(--f-body);font-size:.62rem;color:var(--muted);margin-right:3px}
+.chapter .kv{display:block;font-family:var(--f-display);font-size:.98rem;line-height:1.7;color:var(--ink);margin-top:2px;word-break:keep-all}
+.chapter .kv:empty{display:none}
 .kjv sup{font-family:var(--f-body);font-size:.62rem;color:var(--muted);margin-right:3px;font-variant-numeric:tabular-nums}
 .meaning{margin:0;color:var(--ink)}
 .why{margin:0;color:var(--muted);font-size:.93rem}
@@ -85,7 +90,7 @@ textarea:focus,input:focus,select:focus,button:focus-visible{outline:2px solid v
 .daily{display:flex;flex-direction:column;gap:10px}
 .reader-controls{display:grid;grid-template-columns:2fr 1fr;gap:10px}
 .chapter{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
-.chapter p{font-family:var(--f-kjv);font-size:1.15rem;line-height:1.6;margin:0 0 6px}
+.chapter p{font-family:var(--f-kjv);font-size:1.15rem;line-height:1.6;margin:0 0 14px}
 .chapter p.hl{background:var(--accent-soft);border-radius:4px}
 .chapter-nav{display:flex;justify-content:space-between}
 .hits{display:flex;flex-direction:column;gap:2px}
@@ -143,8 +148,8 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     <div class="chapter-nav"><button class="link" id="prev">← 이전 장</button><button class="link" id="next">다음 장 →</button></div>
     <div class="chapter" id="chapter"><p class="empty">성경 본문을 불러오는 중입니다…</p></div>
     <div class="ask">
-      <label for="q"><h3>킹제임스 성경 전체에서 찾기</h3></label>
-      <input id="q" placeholder="영어 단어로 검색 (예: peace, fear not, comfort)">
+      <label for="q"><h3>성경 전체에서 찾기</h3></label>
+      <input id="q" placeholder="한글이나 영어로 검색 (예: 평안, 두려워 말라, peace)">
       <div class="hint" id="qhint">31,102절 전체를 검색합니다. 최대 100개까지 보여줍니다.</div>
       <div class="hits" id="hits"></div>
     </div>
@@ -155,7 +160,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     <div id="savedList" class="result"></div>
   </section>
 
-  <footer>본문: King James Version (1611/1769, 퍼블릭 도메인) 전체 66권 31,102절. 한국어 풀이와 조언은 참고용이며, 목회자·전문 상담을 대신하지 않습니다. 마음이 많이 힘들다면 자살예방상담전화 <b>109</b> (24시간)로 연락하세요.</footer>
+  <footer>본문: King James Version (1611/1769) 전체 66권 31,102절과 한글 개역한글판(1961), 모두 퍼블릭 도메인. 한국어 풀이와 조언은 참고용이며, 목회자·전문 상담을 대신하지 않습니다. 마음이 많이 힘들다면 자살예방상담전화 <b>109</b> (24시간)로 연락하세요.<br>앱 버전 2026.10.27</footer>
 </div>
 
 <script>
@@ -200,6 +205,9 @@ function loadBible(){
   return bibleReady;
 }
 loadBible().catch(()=>{});
+let KOR=null;
+function loadKor(){ return fetch("kor.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{KOR=d;fillKor();}).catch(()=>{}); }
+loadKor();
 
 function findBook(name){ if(name==null)return -1; const k=String(name).trim().toLowerCase(); return byName[k]??byName[String(name).trim()]??-1; }
 function parseRef(s){ const m=s.match(/^(.+?)\s+(\d+):(\d+)(?:-(\d+))?$/); if(!m)return null; return {b:findBook(m[1]),c:+m[2],s:+m[3],e:+(m[4]||m[3])}; }
@@ -211,11 +219,21 @@ function passage(p){ // returns validated passage or null
 const refKo=p=>`${BIBLE[p.b].k} ${p.c}:${p.s}${p.e>p.s?"–"+p.e:""}`;
 const refEn=p=>`${BIBLE[p.b].n} ${p.c}:${p.s}${p.e>p.s?"-"+p.e:""}`;
 
+function korHTML(b,c,s,e){
+  if(!KOR||!KOR[b]||!KOR[b][c-1])return "";
+  const out=[]; for(let v=s;v<=e;v++){const t=KOR[b][c-1][v-1]; if(t)out.push(`<sup>${v}</sup>${esc(t)}`);}
+  return out.join(" ");
+}
+function fillKor(){
+  document.querySelectorAll("[data-kref]").forEach(el=>{const [b,c,s,e]=el.dataset.kref.split(",").map(Number); el.innerHTML=korHTML(b,c,s,e);});
+  document.querySelectorAll("[data-kv]").forEach(el=>{const [b,c,v]=el.dataset.kv.split(",").map(Number); const t=KOR&&KOR[b]&&KOR[b][c-1]&&KOR[b][c-1][v-1]; el.textContent=t||"";});
+}
 function verseCard(p,meaning,why){
   const el=document.createElement("article"); el.className="verse";
   const key=refEn(p);
-  el.innerHTML=`<div class="ref"><b>${esc(refKo(p))}</b><span>${esc(key)} · KJV</span></div>
+  el.innerHTML=`<div class="ref"><b>${esc(refKo(p))}</b><span>${esc(key)} · KJV · 개역한글</span></div>
    <p class="kjv">${p.verses.map((t,i)=>`<sup>${p.s+i}</sup>${esc(t)}`).join(" ")}</p>
+   <p class="kor" data-kref="${p.b},${p.c},${p.s},${p.e}">${korHTML(p.b,p.c,p.s,p.e)}</p>
    ${meaning?`<p class="meaning">${esc(meaning)}</p>`:""}${why?`<p class="why">${esc(why)}</p>`:""}
    <div class="vactions"><button class="link" data-a="ctx">앞뒤 문맥 읽기</button><button class="link" data-a="save">${isSaved(key)?"간직함 ✓":"말씀 간직하기"}</button></div>`;
   el.querySelector('[data-a="ctx"]').onclick=()=>openReader(p.b,p.c,p.s,p.e);
@@ -352,7 +370,7 @@ function showChapter(hs,he){
   const B=BIBLE[cur.b]; $("book").value=cur.b;
   $("chap").innerHTML=B.c.map((_,i)=>`<option value="${i+1}">${i+1}장</option>`).join(""); $("chap").value=cur.c;
   $("chapter").innerHTML=`<h3 style="margin-bottom:12px">${esc(B.k)} ${cur.c}장 <span class="hint">${esc(B.n)} ${cur.c}</span></h3>`+
-    B.c[cur.c-1].map((t,i)=>`<p id="v${i+1}" class="${hs&&i+1>=hs&&i+1<=he?"hl":""}"><sup style="font-family:var(--f-body);font-size:.62rem;color:var(--muted);margin-right:4px">${i+1}</sup>${esc(t)}</p>`).join("");
+    B.c[cur.c-1].map((t,i)=>`<p id="v${i+1}" class="${hs&&i+1>=hs&&i+1<=he?"hl":""}"><sup style="font-family:var(--f-body);font-size:.62rem;color:var(--muted);margin-right:4px">${i+1}</sup>${esc(t)}<span class="kv" data-kv="${cur.b},${cur.c},${i+1}">${esc((KOR&&KOR[cur.b]&&KOR[cur.b][cur.c-1]&&KOR[cur.b][cur.c-1][i])||"")}</span></p>`).join("");
 }
 function openReader(b,c,s,e){ cur={b,c}; setView("read"); showChapter(s,e); document.getElementById("v"+s)?.scrollIntoView({block:"center"}); }
 
@@ -360,8 +378,11 @@ let qt; $("q").oninput=()=>{clearTimeout(qt);qt=setTimeout(search,250);};
 function search(){
   const q=$("q").value.trim(); const box=$("hits"); box.innerHTML=""; if(!BIBLE||q.length<2){$("qhint").textContent="31,102절 전체를 검색합니다. 최대 100개까지 보여줍니다.";return;}
   const ql=q.toLowerCase(); const hits=[]; let total=0;
-  BIBLE.forEach((B,bi)=>B.c.forEach((ch,ci)=>ch.forEach((t,vi)=>{ if(t.toLowerCase().includes(ql)){ total++; if(hits.length<100)hits.push([bi,ci+1,vi+1,t]); } })));
-  $("qhint").textContent=total?`‘${q}’ ${total.toLocaleString()}절에서 찾았습니다${total>100?" (처음 100절 표시)":""}.`:`‘${q}’를 찾지 못했습니다. KJV는 영어 본문이라 영어 단어로 검색해 주세요.`;
+  const ko=/[가-힣]/.test(q);
+  if(ko&&!KOR){$("qhint").textContent="한글 성경을 불러오는 중입니다. 잠시 후 다시 검색해 주세요.";loadKor().then(search);return;}
+  const src=ko?KOR.map(b=>({c:b})):BIBLE;
+  src.forEach((B,bi)=>B.c.forEach((ch,ci)=>ch.forEach((t,vi)=>{ if(t&&t.toLowerCase().includes(ql)){ total++; if(hits.length<100)hits.push([bi,ci+1,vi+1,t]); } })));
+  $("qhint").textContent=total?`‘${q}’ ${total.toLocaleString()}절에서 찾았습니다${total>100?" (처음 100절 표시)":""}.`:`‘${q}’를 찾지 못했습니다. 다른 낱말로 검색해 보세요.`;
   const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");
   hits.forEach(([b,c,v,t])=>{ const h=document.createElement("button"); h.className="hit";
     h.innerHTML=`<span class="r">${esc(BIBLE[b].k)} ${c}:${v} · ${esc(BIBLE[b].n)}</span><span class="t">${esc(t).replace(re,m=>`<mark>${m}</mark>`)}</span>`;
