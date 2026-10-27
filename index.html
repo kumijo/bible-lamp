@@ -181,10 +181,13 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     <div id="savedList" class="result"></div>
   </section>
 
-  <footer>본문: King James Version (1611/1769) 전체 66권 31,102절과 한글 개역한글판(1961), 모두 퍼블릭 도메인. 한국어 풀이와 조언은 참고용이며, 목회자·전문 상담을 대신하지 않습니다. 마음이 많이 힘들다면 자살예방상담전화 <b>109</b> (24시간)로 연락하세요.<br>앱 버전 2026.10.27-2 (성막 등대)</footer>
+  <footer>본문: King James Version (1611/1769) 전체 66권 31,102절과 한글 개역한글판(1961), 모두 퍼블릭 도메인. 한국어 풀이와 조언은 참고용이며, 목회자·전문 상담을 대신하지 않습니다. 마음이 많이 힘들다면 자살예방상담전화 <b>109</b> (24시간)로 연락하세요.<br>앱 버전 2026.10.27-3 (성막 등대)<br><span id="diag">점검 중…</span></footer>
 </div>
 
 <script>
+window.DIAG={en:"…",ko:"…",sw:"…",err:""};
+function showDiag(){var d=document.getElementById("diag");if(!d)return;var D=window.DIAG;d.textContent="점검: 영어성경 "+D.en+" · 한글성경 "+D.ko+" · 오프라인 "+D.sw+(D.err?" · 오류: "+D.err:"");}
+window.addEventListener("error",function(e){window.DIAG.err=String(e.message||"").slice(0,80);showDiag();});
 window.addEventListener("error",function(e){var d=document.getElementById("out")||document.body;var m=document.createElement("p");m.className="safety";m.textContent="앱 오류: "+(e.message||"알 수 없는 오류")+" — 이 화면을 캡처해서 알려 주세요.";d.appendChild(m);});
 window.addEventListener("unhandledrejection",function(e){var r=e.reason;if(r&&r.code)return;var d=document.getElementById("out")||document.body;var m=document.createElement("p");m.className="safety";m.textContent="앱 오류: "+((r&&r.message)||r)+" — 이 화면을 캡처해서 알려 주세요.";d.appendChild(m);});
 </script>
@@ -221,13 +224,13 @@ function loadBible(){
   bibleReady=fetch("kjv.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{
     BIBLE=d; d.forEach((b,i)=>{byName[b.n.toLowerCase()]=i;byName[b.k]=i;});
     Object.assign(byName,{"psalm":18,"song of songs":21,"revelations":65});
-    initReader(); renderDaily(); renderSaved(); return d;
-  }).catch(e=>{ bibleReady=null; $("chapter").innerHTML='<p class="empty">성경 본문을 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 열어 주세요.</p>'; throw e; });
+    initReader(); renderDaily(); renderSaved(); DIAG.en="✓"; showDiag(); return d;
+  }).catch(e=>{ bibleReady=null; DIAG.en="✗("+(e&&e.message||e)+")"; showDiag(); $("chapter").innerHTML='<p class="empty">성경 본문을 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 열어 주세요.</p>'; throw e; });
   return bibleReady;
 }
 loadBible().catch(()=>{});
 let KOR=null;
-function loadKor(){ return fetch("kor.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{KOR=d;fillKor();}).catch(()=>{}); }
+function loadKor(){ return fetch("kor.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{KOR=d;fillKor();DIAG.ko="✓";showDiag();}).catch(e=>{DIAG.ko="✗("+(e&&e.message||e)+")";showDiag();}); }
 loadKor();
 
 function findBook(name){ if(name==null)return -1; const k=String(name).trim().toLowerCase(); return byName[k]??byName[String(name).trim()]??-1; }
@@ -414,7 +417,8 @@ function search(){
 function setView(v){ document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
   ["ask","read","saved"].forEach(x=>$("view-"+x).hidden=x!==v); store.set("view",v); }
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
-if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(()=>{DIAG.sw="✓";showDiag();}).catch(e=>{DIAG.sw="✗";showDiag();}));}else{DIAG.sw="미지원";}
+showDiag();
 </script>
 </body>
 </html>
